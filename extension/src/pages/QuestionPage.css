@@ -1,6 +1,6 @@
-.popup {
+.question-popup {
   width: 322px;
-  height: 311px;
+  height: 420px;
   background: linear-gradient(160deg, #101940 0%, #2E2D83 100%);
   border-radius: 24px;
   border: 2px solid #4a7cff;
@@ -12,20 +12,7 @@
   box-sizing: border-box;
   font-family: system-ui, -apple-system, sans-serif;
   font-size: 1rem;
-}
-
-.stars {
-  position: absolute;
-  inset: 0;
-}
-
-.star {
-  position: absolute;
-  width: 1.5px;
-  height: 1.5px;
-  background: white;
-  border-radius: 50%;
-  opacity: 0.6;
+  color: white;
 }
 
 .header {
@@ -34,7 +21,6 @@
   justify-content: space-between;
   padding-bottom: 4%;
   border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-  z-index: 1;
 }
 
 .brand {
@@ -44,7 +30,6 @@
 }
 
 .logo-dot {
-  display: block;
   width: 2em;
   height: 2em;
   background: white;
@@ -55,6 +40,7 @@
 .brand-name {
   color: white !important;
   font-size: 1.05em;
+  font-weight: 500;
 }
 
 .close-btn {
@@ -75,50 +61,64 @@
   outline: none;
 }
 
-.header {
-  padding-bottom: 3%;
+.progress-label {
+  font-size: 0.8em;
+  color: rgba(255, 255, 255, 0.7);
+  margin-top: 12px;
 }
 
-.planet-wrap {
+.progress-bar {
+  width: 100%;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 4px;
+  margin-top: 6px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #6D8BE7, #4145A1);
+}
+
+.concept-tag {
+  display: inline-block;
+  margin-top: 14px;
+  padding: 4px 10px;
+  border-radius: 12px;
+  background: rgba(109, 139, 231, 0.25);
+  font-size: 0.75em;
+  width: fit-content;
+}
+
+.question-text {
+  font-size: 0.95em;
+  font-weight: 500;
+  margin-top: 14px;
+  line-height: 1.4;
+}
+
+.answer-box {
+  margin-top: 12px;
   flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 10px;
+  color: white;
+  font-size: 0.85em;
+  padding: 10px;
+  resize: none;
+  font-family: inherit;
 }
 
-.planet-ring {
-  width: 37.3%;
-  aspect-ratio: 1 / 1;
-  border-radius: 50%;
-  background: linear-gradient(135deg, rgba(197, 164, 250, 0.57), rgba(94, 115, 207, 0.57));
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.planet-core {
-  width: 66.7%;
-  aspect-ratio: 1 / 1;
-  background: white;
-  border-radius: 50%;
-}
-
-.start-btn {
+.submit-btn {
   background: linear-gradient(135deg, #6D8BE7, #4145A1);
   color: white;
   border: none;
   border-radius: 40px;
-  padding: 4% 0;
-  font-size: 1.1em;
+  padding: 10px 0;
+  font-size: 1em;
   font-weight: 600;
   cursor: pointer;
-  z-index: 1;
-  margin-bottom: 6%;
-  width: 75%;
-  align-self: center;
-}
-
-.start-btn:hover {
-  opacity: 0.9;
+  margin-top: 10px;
 }
