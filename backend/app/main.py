@@ -9,6 +9,8 @@ app = FastAPI(
 )
 
 app.include_router(youtube_router)
+app.include_router(video.router)
+
 
 app.add_middleware(
     CORSMiddleware,
@@ -18,7 +20,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(video.router)
  
 
 
