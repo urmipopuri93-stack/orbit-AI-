@@ -14,12 +14,14 @@ app.include_router(video.router)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
+    allow_origins=[
+        "http://localhost:5173",
+        "chrome-extension://cmookokdpdaaldelnfdfpfjhffjadinm"
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
  
 
 

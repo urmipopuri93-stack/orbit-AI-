@@ -11,7 +11,11 @@ type VideoInfo = {
   thumbnail_url: string
 }
 
-function SessionSetupPage({ onStart }: { onStart: () => void }) {
+function SessionSetupPage({
+  onStart,
+}: {
+  onStart: (focusLevel: FocusLevel, videoId: string) => void
+}) {
   const [focus, setFocus] = useState<FocusLevel>('Intermediate')
   const [frequency, setFrequency] = useState(70)
 
@@ -289,12 +293,12 @@ function SessionSetupPage({ onStart }: { onStart: () => void }) {
       </div>
 
       <button
-        className="start-btn"
-        onClick={onStart}
-        disabled={isLoading || !videoInfo}
-      >
-        Start Learning
-      </button>
+  className="start-btn"
+  onClick={() => onStart(focus, videoInfo!.video_id)}
+  disabled={isLoading || !videoInfo}
+>
+  Start Learning
+</button>
     </div>
   )
 }

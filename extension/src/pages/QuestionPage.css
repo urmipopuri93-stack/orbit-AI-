@@ -1,124 +1,170 @@
-.question-popup {
-  width: 322px;
-  height: 420px;
-  background: linear-gradient(160deg, #101940 0%, #2E2D83 100%);
+.orbit-card {
+  background: linear-gradient(180deg, #1a1440 0%, #2e2470 100%);
   border-radius: 24px;
-  border: 2px solid #4a7cff;
-  position: relative;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  padding: 5%;
-  box-sizing: border-box;
-  font-family: system-ui, -apple-system, sans-serif;
-  font-size: 1rem;
+  padding: 24px;
+  width: 380px;
   color: white;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
 }
 
-.header {
+.orbit-header {
   display: flex;
-  align-items: center;
   justify-content: space-between;
-  padding-bottom: 4%;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  align-items: center;
 }
 
-.brand {
+.orbit-brand {
   display: flex;
   align-items: center;
-  gap: 0.6em;
+  gap: 8px;
+  font-weight: 600;
+  font-size: 18px;
 }
 
-.logo-dot {
-  width: 2em;
-  height: 2em;
+.orbit-star-icon {
   background: white;
   border-radius: 50%;
-  flex-shrink: 0;
+  padding: 4px;
+  font-size: 16px;
 }
 
-.brand-name {
-  color: white !important;
-  font-size: 1.05em;
-  font-weight: 500;
-}
-
-.close-btn {
-  width: 1.5em;
-  height: 1.5em;
+.orbit-close {
+  background: none;
+  border: 1px solid rgba(255, 255, 255, 0.4);
   border-radius: 50%;
-  border: 1.5px solid white;
-  background: transparent;
   color: white;
-  font-size: 0.7em;
+  width: 28px;
+  height: 28px;
   cursor: pointer;
+}
+
+.orbit-divider {
+  border: none;
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  margin: 16px 0;
+}
+
+.orbit-progress-label {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.8);
+  margin-bottom: 8px;
+}
+
+.orbit-progress-bar {
+  position: relative;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 999px;
+  height: 8px;
+  margin-bottom: 16px;
+}
+
+.orbit-progress-fill {
+  background: linear-gradient(90deg, #7b7fd4, #a5a8e8);
+  height: 100%;
+  border-radius: 999px;
+}
+
+.orbit-progress-percent {
+  position: absolute;
+  right: -36px;
+  top: -6px;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.orbit-concept-row {
   display: flex;
   align-items: center;
-  justify-content: center;
-  padding: 0;
-  appearance: none;
-  -webkit-appearance: none;
-  outline: none;
+  gap: 8px;
+  font-size: 14px;
+  margin-bottom: 8px;
 }
 
-.progress-label {
-  font-size: 0.8em;
-  color: rgba(255, 255, 255, 0.7);
-  margin-top: 12px;
+.orbit-concept-tag {
+  background: rgba(139, 130, 220, 0.4);
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 13px;
 }
 
-.progress-bar {
-  width: 100%;
-  height: 6px;
-  background: rgba(255, 255, 255, 0.15);
-  border-radius: 4px;
-  margin-top: 6px;
-  overflow: hidden;
+.orbit-meta-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.85);
+  margin-bottom: 16px;
 }
 
-.progress-fill {
-  height: 100%;
-  background: linear-gradient(90deg, #6D8BE7, #4145A1);
+.orbit-timer {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 999px;
+  padding: 4px 12px;
+  font-size: 13px;
 }
 
-.concept-tag {
-  display: inline-block;
-  margin-top: 14px;
-  padding: 4px 10px;
-  border-radius: 12px;
-  background: rgba(109, 139, 231, 0.25);
-  font-size: 0.75em;
-  width: fit-content;
-}
-
-.question-text {
-  font-size: 0.95em;
-  font-weight: 500;
-  margin-top: 14px;
-  line-height: 1.4;
-}
-
-.answer-box {
-  margin-top: 12px;
-  flex: 1;
+.orbit-question-box {
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 10px;
-  color: white;
-  font-size: 0.85em;
-  padding: 10px;
-  resize: none;
-  font-family: inherit;
+  border-radius: 16px;
+  padding: 20px;
 }
 
-.submit-btn {
-  background: linear-gradient(135deg, #6D8BE7, #4145A1);
-  color: white;
-  border: none;
-  border-radius: 40px;
-  padding: 10px 0;
-  font-size: 1em;
+.orbit-question-text {
+  font-size: 17px;
   font-weight: 600;
+  margin-bottom: 16px;
+}
+
+.orbit-answer-input {
+  width: 100%;
+  min-height: 140px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  color: white;
+  padding: 12px;
+  font-size: 14px;
+  resize: none;
+  box-sizing: border-box;
+}
+
+.orbit-answer-input::placeholder {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.orbit-help-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.7);
+  margin-top: 12px;
   cursor: pointer;
-  margin-top: 10px;
+}
+
+.orbit-submit-btn {
+  width: 100%;
+  background: linear-gradient(90deg, #6c70c4, #9698e0);
+  border: none;
+  border-radius: 999px;
+  padding: 14px;
+  color: white;
+  font-weight: 700;
+  font-size: 16px;
+  margin-top: 20px;
+  cursor: pointer;
+}
+
+.orbit-submit-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.orbit-footer-note {
+  text-align: center;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.5);
+  margin-top: 12px;
 }
