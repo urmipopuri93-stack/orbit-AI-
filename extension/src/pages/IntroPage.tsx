@@ -1,4 +1,4 @@
-import './IntroPage.css'
+﻿import './IntroPage.css'
 
 function IntroPage({ onStart }: { onStart: () => void }) {
   return (
@@ -27,7 +27,7 @@ function IntroPage({ onStart }: { onStart: () => void }) {
           <span className="brand-name">OrbitAI</span>
         </div>
         <button className="close-btn" aria-label="Close">
-          ✕
+          âœ•
         </button>
       </div>
 

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+﻿import { useEffect, useState } from 'react'
 import './SessionSetupPage.css'
 
 type FocusLevel = 'Basic' | 'Intermediate' | 'Mastery'
@@ -71,7 +71,7 @@ function SessionSetupPage({
         }
 
         const endpoint = new URL(
-          'http://127.0.0.1:8000/api/video-info',
+          'http://127.0.0.1:8001/api/video-info',
         )
 
         endpoint.searchParams.set(
@@ -195,7 +195,7 @@ function SessionSetupPage({
           aria-label="Close"
           onClick={handleClose}
         >
-          ✕
+          âœ•
         </button>
       </div>
 
