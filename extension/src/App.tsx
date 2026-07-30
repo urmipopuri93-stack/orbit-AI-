@@ -4,6 +4,7 @@ import SessionSetupPage from './pages/SessionSetupPage'
 import QuestionPage from './pages/QuestionPage'
 import CorrectPage from './pages/CorrectPage'
 import IncorrectPage from './pages/IncorrectPage'
+import ChatPage from './pages/ChatPage'
 import './App.css'
 
 type Screen =
@@ -12,6 +13,9 @@ type Screen =
   | 'question'
   | 'correct'
   | 'incorrect'
+  | 'chat'
+
+
 
 type FocusLevel =
   | 'Basic'
@@ -334,6 +338,10 @@ function App() {
     }
   }
 
+  function handleOpenChat() {
+  setScreen('chat')
+    }
+
   function handleFollowUp() {
     console.log(
       'Follow up with Orby clicked',
@@ -401,6 +409,11 @@ function App() {
           onClose={
             handleCloseSession
           }
+
+           onOpenChat={
+      handleOpenChat
+    }
+
         />
       )}
 
@@ -458,6 +471,12 @@ function App() {
             }
           />
         )}
+        {screen === 'chat' && (
+  <ChatPage
+    segments={segments}
+    onClose={() => setScreen('question')}
+  />
+)}
     </>
   )
 }

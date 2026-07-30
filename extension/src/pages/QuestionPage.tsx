@@ -45,6 +45,7 @@ interface QuestionPageProps {
   videoId?: string | null
   onAnswered?: (result: AnswerResult) => void
   onClose?: () => void
+  onOpenChat?: () => void
 }
 
 export default function QuestionPage({
@@ -57,7 +58,9 @@ export default function QuestionPage({
   videoId = null,
   onAnswered = () => {},
   onClose = () => {},
+  onOpenChat = () => {},
 }: QuestionPageProps) {
+
   const [topic, setTopic] = useState('')
   const [question, setQuestion] = useState('')
   const [correctAnswer, setCorrectAnswer] =
@@ -442,13 +445,13 @@ export default function QuestionPage({
           onKeyDown={handleKeyDown}
         />
 
-        <div className="orbit-help-row">
+        <div className="orbit-help-row" onClick={onOpenChat}>
           <span className="orbit-star-icon-small">
             â­
           </span>
 
           <span>
-            Click to ask Orby for help!
+            Click to chat with Orby!
           </span>
         </div>
       </div>
