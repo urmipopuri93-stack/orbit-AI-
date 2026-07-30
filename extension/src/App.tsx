@@ -1,6 +1,15 @@
-﻿import { useEffect, useState } from 'react'
+﻿import {
+  useEffect,
+  useState,
+} from 'react'
+
 import IntroPage from './pages/IntroPage'
-import SessionSetupPage from './pages/SessionSetupPage'
+
+import SessionSetupPage, {
+  type FocusLevel,
+  type FrequencyLabel,
+} from './pages/SessionSetupPage'
+
 import QuestionPage from './pages/QuestionPage'
 import CorrectPage from './pages/CorrectPage'
 import IncorrectPage from './pages/IncorrectPage'
@@ -17,18 +26,17 @@ type Screen =
 
 
 
-type FocusLevel =
-  | 'Basic'
-  | 'Intermediate'
-  | 'Mastery'
-
 interface Segment {
   text: string
   start: number
   duration: number
 }
 
-export interface AnswerResult {
+interface TranscriptResponse {
+  segments?: Segment[]
+}
+
+interface AnswerResult {
   is_correct: boolean
   user_answer: string
   correct_answer: string
@@ -37,7 +45,17 @@ export interface AnswerResult {
   timestamp?: number
 }
 
-interface TranscriptResponse {
+interface PendingQuestion {
+  videoId?: string
+  currentTime?: number
+  frequency?: FrequencyLabel
+  createdAt?: number
+}
+
+interface StoredSession {
+  focusLevel?: FocusLevel
+  frequency?: FrequencyLabel
+  videoId?: string
   segments?: Segment[]
 }
 
@@ -47,7 +65,9 @@ interface ShowQuestionMessage {
   currentTime: number
 }
 
-function formatTimestamp(seconds?: number): string {
+function formatTimestamp(
+  seconds?: number,
+): string {
   if (
     seconds === undefined ||
     Number.isNaN(seconds)
@@ -77,7 +97,19 @@ function App() {
     useState<Screen>('intro')
 
   const [focusLevel, setFocusLevel] =
-    useState<FocusLevel>('Intermediate')
+    useState<FocusLevel>(
+      'Intermediate',
+    )
+
+  /*
+   * The frequency value itself is not displayed in App,
+   * but setFrequency is used while restoring and starting
+   * sessions.
+   */
+  const [, setFrequency] =
+    useState<FrequencyLabel>(
+      'Moderate',
+    )
 
   const [segments, setSegments] =
     useState<Segment[]>([])
@@ -88,33 +120,141 @@ function App() {
   const [videoId, setVideoId] =
     useState<string | null>(null)
 
-  const [questionNumber, setQuestionNumber] =
-    useState(1)
+  const [
+    questionNumber,
+    setQuestionNumber,
+  ] = useState(1)
 
-  const [answerResult, setAnswerResult] =
-    useState<AnswerResult | null>(null)
+  const [
+    answerResult,
+    setAnswerResult,
+  ] =
+    useState<AnswerResult | null>(
+      null,
+    )
 
   const totalQuestions = 6
 
   /*
-   * Listen for the YouTube content script.
-   * When the video reaches a checkpoint,
-   * the content script sends SHOW_QUESTION.
+   * Restore the learning session and pending question
+   * when the popup opens.
+   */
+  useEffect(() => {
+    async function restoreSession() {
+      try {
+        const stored =
+          await chrome.storage.local.get(
+            [
+              'orbitPendingQuestion',
+              'orbitSession',
+              'orbitQuestionNumber',
+            ],
+          )
+
+        const pending =
+          stored.orbitPendingQuestion as
+            | PendingQuestion
+            | undefined
+
+        const session =
+          stored.orbitSession as
+            | StoredSession
+            | undefined
+
+        if (!session) {
+          return
+        }
+
+        if (
+          session.focusLevel
+        ) {
+          setFocusLevel(
+            session.focusLevel,
+          )
+        }
+
+        if (session.frequency) {
+          setFrequency(
+            session.frequency,
+          )
+        }
+
+        if (session.videoId) {
+          setVideoId(
+            session.videoId,
+          )
+        }
+
+        if (
+          Array.isArray(
+            session.segments,
+          )
+        ) {
+          setSegments(
+            session.segments,
+          )
+        }
+
+        if (
+          typeof stored.orbitQuestionNumber ===
+          'number'
+        ) {
+          setQuestionNumber(
+            stored.orbitQuestionNumber,
+          )
+        }
+
+        if (pending) {
+          setVideoId(
+            pending.videoId ??
+              session.videoId ??
+              null,
+          )
+
+          setCurrentTime(
+            typeof pending.currentTime ===
+              'number'
+              ? pending.currentTime
+              : 0,
+          )
+
+          setAnswerResult(null)
+          setScreen('question')
+        }
+      } catch (error) {
+        console.error(
+          'Could not restore OrbitAI session:',
+          error,
+        )
+      }
+    }
+
+    void restoreSession()
+  }, [])
+
+  /*
+   * Receive a question message while the popup
+   * is already open.
    */
   useEffect(() => {
     const listener = (
       message: ShowQuestionMessage,
     ) => {
       if (
-        message.type !== 'SHOW_QUESTION'
+        message.type !==
+        'SHOW_QUESTION'
       ) {
         return
       }
 
-      setVideoId(message.videoId)
+      setVideoId(
+        message.videoId,
+      )
+
       setCurrentTime(
         message.currentTime,
       )
+
       setAnswerResult(null)
       setScreen('question')
     }
@@ -131,120 +271,137 @@ function App() {
   }, [])
 
   /*
-   * Called by SessionSetupPage when the
-   * Start Learning button is clicked.
+   * Starts the learning session.
    */
   async function handleStartSession(
     selectedFocusLevel: FocusLevel,
     selectedVideoId: string,
+    selectedFrequency: FrequencyLabel,
   ) {
-    try {
-      console.log(
-        'Starting learning session',
-        {
-          selectedFocusLevel,
-          selectedVideoId,
+    setFocusLevel(
+      selectedFocusLevel,
+    )
+
+    setFrequency(
+      selectedFrequency,
+    )
+
+    setVideoId(selectedVideoId)
+    setSegments([])
+    setCurrentTime(0)
+    setQuestionNumber(1)
+    setAnswerResult(null)
+
+    const response = await fetch(
+      'http://127.0.0.1:8001/video/transcript',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type':
+            'application/json',
         },
-      )
+        body: JSON.stringify({
+          video_id:
+            selectedVideoId,
+        }),
+      },
+    )
 
-      setFocusLevel(
-        selectedFocusLevel,
-      )
+    if (!response.ok) {
+      const errorText =
+        await response.text()
 
-      setVideoId(selectedVideoId)
-      setSegments([])
-      setCurrentTime(0)
-      setQuestionNumber(1)
-      setAnswerResult(null)
-
-      const response = await fetch(
-        'http://127.0.0.1:8001/video/transcript',
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type':
-              'application/json',
-          },
-          body: JSON.stringify({
-            video_id: selectedVideoId,
-          }),
-        },
-      )
-
-      if (!response.ok) {
-        const errorText =
-          await response.text()
-
-        throw new Error(
-          `Transcript request failed: ${response.status} ${errorText}`,
-        )
-      }
-
-      const data =
-        (await response.json()) as TranscriptResponse
-
-      console.log(
-        'Transcript response:',
-        data,
-      )
-
-      if (
-        !Array.isArray(data.segments) ||
-        data.segments.length === 0
-      ) {
-        throw new Error(
-          'No transcript segments were returned for this video.',
-        )
-      }
-
-      setSegments(data.segments)
-
-      /*
-       * Select a transcript timestamp that
-       * definitely contains some video content.
-       */
-      const startingIndex = Math.min(
-        5,
-        data.segments.length - 1,
-      )
-
-      setCurrentTime(
-        data.segments[
-          startingIndex
-        ].start,
-      )
-
-      /*
-       * For your current flow, immediately
-       * display the first question.
-       */
-      setScreen('question')
-    } catch (error) {
-      console.error(
-        'Could not start learning session:',
-        error,
-      )
-
-      alert(
-        error instanceof Error
-          ? error.message
-          : 'Could not start learning.',
+      throw new Error(
+        `Transcript request failed: ${response.status} ${errorText}`,
       )
     }
+
+    const data =
+      (await response.json()) as TranscriptResponse
+
+    if (
+      !Array.isArray(
+        data.segments,
+      ) ||
+      data.segments.length === 0
+    ) {
+      throw new Error(
+        'No transcript segments were returned for this video.',
+      )
+    }
+
+    setSegments(data.segments)
+
+    await chrome.storage.local.set({
+      orbitSession: {
+        focusLevel:
+          selectedFocusLevel,
+        frequency:
+          selectedFrequency,
+        videoId:
+          selectedVideoId,
+        segments:
+          data.segments,
+      },
+      orbitQuestionNumber: 1,
+    })
+
+    const tabs =
+      await chrome.tabs.query({
+        active: true,
+        currentWindow: true,
+      })
+
+    const activeTabId =
+      tabs[0]?.id
+
+    if (!activeTabId) {
+      throw new Error(
+        'Could not find the active YouTube tab.',
+      )
+    }
+
+    let contentResponse:
+      | {
+          success?: boolean
+          error?: string
+        }
+      | undefined
+
+    try {
+      contentResponse =
+        await chrome.tabs.sendMessage(
+          activeTabId,
+          {
+            type: 'START_SESSION',
+            frequency:
+              selectedFrequency,
+            videoId:
+              selectedVideoId,
+          },
+        )
+    } catch {
+      throw new Error(
+        'OrbitAI could not connect to the YouTube page. Refresh the YouTube page and try again.',
+      )
+    }
+
+    if (!contentResponse?.success) {
+      throw new Error(
+        contentResponse?.error ??
+          'Could not start the video timer.',
+      )
+    }
+
+    window.close()
   }
 
   /*
-   * Called by QuestionPage after the user
-   * submits an answer.
+   * Receives the checked answer from QuestionPage.
    */
   function handleAnswered(
     result: AnswerResult,
   ) {
-    console.log(
-      'Answer result:',
-      result,
-    )
-
     setAnswerResult(result)
 
     if (result.is_correct) {
@@ -255,36 +412,113 @@ function App() {
   }
 
   /*
-   * Continue to another generated question.
+   * Resumes the YouTube video after the user
+   * finishes reviewing feedback.
    */
-  function handleContinueLearning() {
-    setQuestionNumber(
-      (previousQuestion) =>
+  async function handleContinueLearning() {
+    try {
+      const tabs =
+        await chrome.tabs.query({
+          active: true,
+          currentWindow: true,
+        })
+
+      const activeTabId =
+        tabs[0]?.id
+
+      if (!activeTabId) {
+        throw new Error(
+          'Could not find the active YouTube tab.',
+        )
+      }
+
+      const nextQuestionNumber =
         Math.min(
-          previousQuestion + 1,
+          questionNumber + 1,
           totalQuestions,
-        ),
-    )
+        )
 
-    setAnswerResult(null)
+      setQuestionNumber(
+        nextQuestionNumber,
+      )
 
-    /*
-     * Move the transcript window forward
-     * before generating the next question.
-     */
-    setCurrentTime(
-      (previousTime) =>
-        previousTime + 120,
-    )
+      await chrome.storage.local.set({
+        orbitQuestionNumber:
+          nextQuestionNumber,
+      })
 
-    setScreen('question')
+      const responseFromContent =
+        await chrome.tabs.sendMessage(
+          activeTabId,
+          {
+            type: 'RESUME_VIDEO',
+          },
+        )
+
+      if (
+        !responseFromContent?.success
+      ) {
+        throw new Error(
+          responseFromContent?.error ??
+            'Could not resume the video.',
+        )
+      }
+
+      setAnswerResult(null)
+      window.close()
+    } catch (error) {
+      console.error(
+        'Could not resume the video:',
+        error,
+      )
+
+      window.alert(
+        error instanceof Error
+          ? error.message
+          : 'Could not resume the video.',
+      )
+    }
   }
 
   /*
-   * Close the current session and return
-   * to the intro page.
+   * Ends the learning session and clears stored data.
    */
-  function handleCloseSession() {
+  async function handleCloseSession() {
+    try {
+      const tabs =
+        await chrome.tabs.query({
+          active: true,
+          currentWindow: true,
+        })
+
+      const activeTabId =
+        tabs[0]?.id
+
+      if (activeTabId) {
+        await chrome.tabs
+          .sendMessage(
+            activeTabId,
+            {
+              type: 'STOP_SESSION',
+            },
+          )
+          .catch(() => undefined)
+      }
+
+      await chrome.storage.local.remove(
+        [
+          'orbitSession',
+          'orbitPendingQuestion',
+          'orbitQuestionNumber',
+        ],
+      )
+    } catch (error) {
+      console.error(
+        'Could not fully stop the session:',
+        error,
+      )
+    }
+
     setScreen('intro')
     setSegments([])
     setCurrentTime(0)
@@ -294,15 +528,15 @@ function App() {
   }
 
   /*
-   * Send a message to the YouTube content
-   * script so it can seek to the relevant
-   * timestamp.
+   * Moves the YouTube video to the feedback timestamp.
    */
   async function handleJumpToSection() {
-    if (!answerResult?.timestamp) {
-      console.warn(
-        'No timestamp was returned.',
-      )
+    const timestamp =
+      answerResult?.timestamp
+
+    if (
+      timestamp === undefined
+    ) {
       return
     }
 
@@ -326,13 +560,14 @@ function App() {
         activeTabId,
         {
           type: 'JUMP_TO_TIMESTAMP',
-          timestamp:
-            answerResult.timestamp,
+          timestamp,
         },
       )
+
+      window.close()
     } catch (error) {
       console.error(
-        'Could not jump to timestamp:',
+        'Could not jump to the video section:',
         error,
       )
     }
@@ -343,27 +578,20 @@ function App() {
     }
 
   function handleFollowUp() {
-    console.log(
-      'Follow up with Orby clicked',
-    )
-
-    /*
-     * You can later replace this with an
-     * Orby chat page.
-     */
-    alert(
+    window.alert(
       'Orby follow-up is coming soon!',
     )
   }
 
-  const progressPercent = Math.min(
-    100,
-    Math.round(
-      (questionNumber /
-        totalQuestions) *
-        100,
-    ),
-  )
+  const progressPercent =
+    Math.min(
+      100,
+      Math.round(
+        (questionNumber /
+          totalQuestions) *
+          100,
+      ),
+    )
 
   const feedbackTimestamp =
     formatTimestamp(
@@ -406,8 +634,8 @@ function App() {
           onAnswered={
             handleAnswered
           }
-          onClose={
-            handleCloseSession
+          onClose={() =>
+            void handleCloseSession()
           }
 
            onOpenChat={
@@ -430,14 +658,14 @@ function App() {
             evidenceTimestamp={
               feedbackTimestamp
             }
-            onContinue={
-              handleContinueLearning
+            onContinue={() =>
+              void handleContinueLearning()
             }
             onFollowUp={
               handleFollowUp
             }
-            onClose={
-              handleCloseSession
+            onClose={() =>
+              void handleCloseSession()
             }
           />
         )}
@@ -457,17 +685,17 @@ function App() {
             relatedTimestamp={
               feedbackTimestamp
             }
-            onContinue={
-              handleContinueLearning
+            onContinue={() =>
+              void handleContinueLearning()
             }
             onLearnMore={
               handleFollowUp
             }
-            onJumpToSection={
-              handleJumpToSection
+            onJumpToSection={() =>
+              void handleJumpToSection()
             }
-            onClose={
-              handleCloseSession
+            onClose={() =>
+              void handleCloseSession()
             }
           />
         )}

@@ -1,124 +1,547 @@
-﻿.popup {
+﻿.intro-popup {
+  position: relative;
   width: 322px;
   height: 311px;
-  background: linear-gradient(160deg, #101940 0%, #2E2D83 100%);
-  border-radius: 24px;
-  border: 2px solid #4a7cff;
-  position: relative;
   overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  padding: 5%;
+  padding: 16px;
   box-sizing: border-box;
-  font-family: system-ui, -apple-system, sans-serif;
-  font-size: 1rem;
+  color: #ffffff;
+  background: linear-gradient(
+    180deg,
+    #111a4d 0%,
+    #1d256c 55%,
+    #302f91 100%
+  );
+  border-radius: 20px;
+  font-family:
+    Inter,
+    Arial,
+    sans-serif;
 }
 
-.stars {
+/* ---------- SMALL BACKGROUND STARS ---------- */
+
+.intro-background-stars {
   position: absolute;
   inset: 0;
+  pointer-events: none;
 }
 
-.star {
+.tiny-star {
   position: absolute;
-  width: 1.5px;
-  height: 1.5px;
-  background: white;
+  width: 2px;
+  height: 2px;
   border-radius: 50%;
-  opacity: 0.6;
+  background: #ffffff;
+  opacity: 0.9;
 }
 
-.header {
+.star-1 {
+  top: 68px;
+  left: 39px;
+}
+
+.star-2 {
+  top: 101px;
+  left: 152px;
+}
+
+.star-3 {
+  top: 73px;
+  right: 49px;
+}
+
+.star-4 {
+  top: 137px;
+  left: 57px;
+}
+
+.star-5 {
+  top: 132px;
+  right: 31px;
+}
+
+.star-6 {
+  top: 176px;
+  left: 29px;
+}
+
+.star-7 {
+  top: 190px;
+  right: 75px;
+}
+
+.star-8 {
+  bottom: 83px;
+  left: 86px;
+}
+
+.star-9 {
+  right: 38px;
+  bottom: 69px;
+}
+
+.star-10 {
+  bottom: 42px;
+  left: 48px;
+}
+
+.star-11 {
+  bottom: 31px;
+  left: 187px;
+}
+
+.star-12 {
+  bottom: 86px;
+  left: 155px;
+}
+
+/* ---------- HEADER ---------- */
+
+.intro-header {
+  position: relative;
+  z-index: 10;
   display: flex;
+  width: 290px;
+  height: 32px;
   align-items: center;
   justify-content: space-between;
-  padding-bottom: 4%;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-  z-index: 1;
 }
 
-.brand {
+.intro-brand {
   display: flex;
   align-items: center;
-  gap: 0.6em;
+  gap: 8px;
 }
 
-.logo-dot {
-  display: block;
-  width: 2em;
-  height: 2em;
-  background: white;
-  border-radius: 50%;
+.intro-logo-circle {
+  display: grid;
+  width: 32px;
+  height: 32px;
   flex-shrink: 0;
-}
-
-.brand-name {
-  color: white !important;
-  font-size: 1.05em;
-}
-
-.close-btn {
-  width: 1.5em;
-  height: 1.5em;
+  place-items: center;
+  overflow: hidden;
   border-radius: 50%;
-  border: 1.5px solid white;
-  background: transparent;
-  color: white;
-  font-size: 0.7em;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  background: #625ca8;
+}
+
+.intro-logo-image {
+  display: block;
+  width: 70px;
+  height: 70px;
+  object-fit: contain;
+  object-position: center;
+  transform: scale(2.35);
+  pointer-events: none;
+}
+
+.intro-brand-name {
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 15px;
+  white-space: nowrap;
+}
+
+.intro-close-button {
+  display: grid;
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  place-items: center;
   padding: 0;
-  appearance: none;
-  -webkit-appearance: none;
-  outline: none;
-}
-
-.header {
-  padding-bottom: 3%;
-}
-
-.planet-wrap {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1;
-}
-
-.planet-ring {
-  width: 37.3%;
-  aspect-ratio: 1 / 1;
+  color: #ffffff;
+  background: transparent;
+  border: 2px solid #ffffff;
   border-radius: 50%;
-  background: linear-gradient(135deg, rgba(197, 164, 250, 0.57), rgba(94, 115, 207, 0.57));
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.planet-core {
-  width: 66.7%;
-  aspect-ratio: 1 / 1;
-  background: white;
-  border-radius: 50%;
-}
-
-.start-btn {
-  background: linear-gradient(135deg, #6D8BE7, #4145A1);
-  color: white;
-  border: none;
-  border-radius: 40px;
-  padding: 4% 0;
-  font-size: 1.1em;
-  font-weight: 600;
   cursor: pointer;
-  z-index: 1;
-  margin-bottom: 6%;
-  width: 75%;
-  align-self: center;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
 }
 
-.start-btn:hover {
+.intro-close-button:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.intro-close-button:active {
+  transform: scale(0.94);
+}
+
+.intro-divider {
+  position: relative;
+  z-index: 10;
+  width: 290px;
+  height: 1px;
+  margin-top: 8px;
+  background: rgba(255, 255, 255, 0.5);
+}
+
+/* ---------- MAIN CONTENT ---------- */
+
+.intro-main {
+  position: relative;
+  width: 290px;
+  height: 238px;
+}
+
+/* ---------- LARGE CENTER MASCOT ---------- */
+
+.intro-hero-wrapper {
+  position: absolute;
+  top: 18px;
+  left: 50%;
+  z-index: 5;
+  width: 122px;
+  height: 122px;
+  transform: translateX(-50%);
+}
+
+.intro-hero-glow {
+  display: grid;
+  width: 122px;
+  height: 122px;
+  place-items: center;
+  overflow: hidden;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at center,
+    #7169b9 0%,
+    #5e58aa 58%,
+    #45459a 100%
+  );
+}
+
+.intro-hero-image {
+  display: block;
+  width: 220px;
+  height: 220px;
+  object-fit: contain;
+  object-position: center;
+  transform: scale(2.4) translateY(2px);
+  pointer-events: none;
+}
+
+/* ---------- LAUNCH BUTTON ---------- */
+
+.launch-orbit-button {
+  position: absolute;
+  bottom: 15px;
+  left: 50%;
+  z-index: 8;
+  width: 114px;
+  height: 48px;
+  padding: 0;
+  transform: translateX(-50%);
+  color: #ffffff;
+  background: linear-gradient(
+    135deg,
+    #6c89e8,
+    #5053be
+  );
+  border: 0;
+  border-radius: 24px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+  box-shadow:
+    0 7px 16px rgba(9, 14, 65, 0.22);
+}
+
+.launch-orbit-button:hover {
+  filter: brightness(1.08);
+}
+
+.launch-orbit-button:active {
+  transform:
+    translateX(-50%)
+    scale(0.98);
+}
+
+/* ---------- CONSTELLATIONS ---------- */
+
+.constellation {
+  position: absolute;
+  pointer-events: none;
   opacity: 0.9;
+}
+
+.constellation-dot {
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: #ffffff;
+}
+
+.constellation-line {
+  position: absolute;
+  height: 1px;
+  transform-origin: left center;
+  background: rgba(255, 255, 255, 0.85);
+}
+
+/* Top-left */
+
+.constellation-top-left {
+  top: 24px;
+  left: 49px;
+  width: 65px;
+  height: 42px;
+}
+
+.constellation-top-left .dot-a {
+  top: 0;
+  left: 0;
+}
+
+.constellation-top-left .dot-b {
+  top: 22px;
+  left: 5px;
+}
+
+.constellation-top-left .dot-c {
+  top: 32px;
+  left: 61px;
+}
+
+.constellation-top-left .line-a {
+  top: 2px;
+  left: 2px;
+  width: 22px;
+  transform: rotate(77deg);
+}
+
+.constellation-top-left .line-b {
+  top: 24px;
+  left: 7px;
+  width: 56px;
+  transform: rotate(10deg);
+}
+
+/* Top-right */
+
+.constellation-top-right {
+  top: 10px;
+  right: 22px;
+  width: 86px;
+  height: 48px;
+}
+
+.constellation-top-right .dot-a {
+  top: 0;
+  left: 0;
+}
+
+.constellation-top-right .dot-b {
+  top: 10px;
+  left: 42px;
+}
+
+.constellation-top-right .dot-c {
+  top: 29px;
+  left: 47px;
+}
+
+.constellation-top-right .dot-d {
+  top: 41px;
+  left: 82px;
+}
+
+.constellation-top-right .line-a {
+  top: 2px;
+  left: 2px;
+  width: 42px;
+  transform: rotate(12deg);
+}
+
+.constellation-top-right .line-b {
+  top: 12px;
+  left: 44px;
+  width: 18px;
+  transform: rotate(75deg);
+}
+
+.constellation-top-right .line-c {
+  top: 31px;
+  left: 49px;
+  width: 35px;
+  transform: rotate(18deg);
+}
+
+/* Middle-left */
+
+.constellation-left {
+  top: 89px;
+  left: 0;
+  width: 55px;
+  height: 48px;
+}
+
+.constellation-left .dot-a {
+  top: 0;
+  left: 0;
+}
+
+.constellation-left .dot-b {
+  top: 20px;
+  left: 7px;
+}
+
+.constellation-left .dot-c {
+  top: 37px;
+  left: 51px;
+}
+
+.constellation-left .line-a {
+  top: 2px;
+  left: 2px;
+  width: 20px;
+  transform: rotate(72deg);
+}
+
+.constellation-left .line-b {
+  top: 22px;
+  left: 9px;
+  width: 44px;
+  transform: rotate(21deg);
+}
+
+/* Middle-right */
+
+.constellation-right {
+  top: 101px;
+  right: 0;
+  width: 55px;
+  height: 39px;
+}
+
+.constellation-right .dot-a {
+  top: 0;
+  left: 0;
+}
+
+.constellation-right .dot-b {
+  top: 24px;
+  left: 8px;
+}
+
+.constellation-right .dot-c {
+  top: 13px;
+  left: 52px;
+}
+
+.constellation-right .line-a {
+  top: 2px;
+  left: 2px;
+  width: 25px;
+  transform: rotate(72deg);
+}
+
+.constellation-right .line-b {
+  top: 26px;
+  left: 10px;
+  width: 44px;
+  transform: rotate(-15deg);
+}
+
+/* Bottom-left */
+
+.constellation-bottom-left {
+  bottom: 8px;
+  left: 3px;
+  width: 67px;
+  height: 48px;
+}
+
+.constellation-bottom-left .dot-a {
+  top: 0;
+  left: 0;
+}
+
+.constellation-bottom-left .dot-b {
+  top: 11px;
+  left: 7px;
+}
+
+.constellation-bottom-left .dot-c {
+  top: 23px;
+  left: 52px;
+}
+
+.constellation-bottom-left .dot-d {
+  top: 44px;
+  left: 44px;
+}
+
+.constellation-bottom-left .line-a {
+  top: 2px;
+  left: 2px;
+  width: 12px;
+  transform: rotate(67deg);
+}
+
+.constellation-bottom-left .line-b {
+  top: 13px;
+  left: 9px;
+  width: 45px;
+  transform: rotate(14deg);
+}
+
+.constellation-bottom-left .line-c {
+  top: 25px;
+  left: 54px;
+  width: 22px;
+  transform: rotate(110deg);
+}
+
+/* Bottom-right */
+
+.constellation-bottom-right {
+  right: 3px;
+  bottom: 9px;
+  width: 65px;
+  height: 48px;
+}
+
+.constellation-bottom-right .dot-a {
+  top: 0;
+  left: 0;
+}
+
+.constellation-bottom-right .dot-b {
+  top: 23px;
+  left: 7px;
+}
+
+.constellation-bottom-right .dot-c {
+  top: 14px;
+  left: 52px;
+}
+
+.constellation-bottom-right .dot-d {
+  top: 41px;
+  left: 60px;
+}
+
+.constellation-bottom-right .line-a {
+  top: 2px;
+  left: 2px;
+  width: 24px;
+  transform: rotate(75deg);
+}
+
+.constellation-bottom-right .line-b {
+  top: 25px;
+  left: 9px;
+  width: 45px;
+  transform: rotate(-11deg);
+}
+
+.constellation-bottom-right .line-c {
+  top: 16px;
+  left: 54px;
+  width: 25px;
+  transform: rotate(74deg);
 }
