@@ -1,7 +1,15 @@
 ﻿import { useEffect, useState } from 'react'
 import './SessionSetupPage.css'
 
-type FocusLevel = 'Basic' | 'Intermediate' | 'Mastery'
+export type FocusLevel =
+  | 'Basic'
+  | 'Intermediate'
+  | 'Mastery'
+
+export type FrequencyLabel =
+  | 'Occasional'
+  | 'Moderate'
+  | 'Frequent'
 
 type VideoInfo = {
   video_id: string
@@ -11,28 +19,49 @@ type VideoInfo = {
   thumbnail_url: string
 }
 
+interface SessionSetupPageProps {
+  onStart: (
+    focusLevel: FocusLevel,
+    videoId: string,
+    frequency: FrequencyLabel,
+  ) => Promise<void> | void
+}
+
 function SessionSetupPage({
   onStart,
-}: {
-  onStart: (focusLevel: FocusLevel, videoId: string) => void
-}) {
-  const [focus, setFocus] = useState<FocusLevel>('Intermediate')
-  const [frequency, setFrequency] = useState(70)
+}: SessionSetupPageProps) {
+  const [focus, setFocus] =
+    useState<FocusLevel>('Intermediate')
 
-  const [videoInfo, setVideoInfo] = useState<VideoInfo | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const [videoError, setVideoError] = useState('')
+  const [frequency, setFrequency] =
+    useState(70)
+
+  const [videoInfo, setVideoInfo] =
+    useState<VideoInfo | null>(null)
+
+  const [isLoading, setIsLoading] =
+    useState(true)
+
+  const [isStarting, setIsStarting] =
+    useState(false)
+
+  const [videoError, setVideoError] =
+    useState('')
 
   useEffect(() => {
+    const controller =
+      new AbortController()
+
     async function loadCurrentVideo() {
       try {
         setIsLoading(true)
         setVideoError('')
 
-        const tabs = await chrome.tabs.query({
-          active: true,
-          lastFocusedWindow: true,
-        })
+        const tabs =
+          await chrome.tabs.query({
+            active: true,
+            lastFocusedWindow: true,
+          })
 
         const currentTab = tabs[0]
 
@@ -49,13 +78,19 @@ function SessionSetupPage({
         const url = new URL(currentUrl)
 
         const isRegularYouTubeVideo =
-          url.hostname.includes('youtube.com') &&
+          url.hostname.includes(
+            'youtube.com',
+          ) &&
           url.pathname === '/watch' &&
           url.searchParams.has('v')
 
         const isYouTubeShort =
-          url.hostname.includes('youtube.com') &&
-          url.pathname.startsWith('/shorts/')
+          url.hostname.includes(
+            'youtube.com',
+          ) &&
+          url.pathname.startsWith(
+            '/shorts/',
+          )
 
         const isYouTubeShortLink =
           url.hostname === 'youtu.be'
@@ -66,7 +101,7 @@ function SessionSetupPage({
           !isYouTubeShortLink
         ) {
           throw new Error(
-            'Open a YouTube video before launching Orbit AI.',
+            'Open a YouTube video before launching OrbitAI.',
           )
         }
 
@@ -81,12 +116,16 @@ function SessionSetupPage({
 
         const response = await fetch(
           endpoint.toString(),
+          {
+            signal: controller.signal,
+          },
         )
 
         if (!response.ok) {
-          const errorData = await response
-            .json()
-            .catch(() => null)
+          const errorData =
+            await response
+              .json()
+              .catch(() => null)
 
           throw new Error(
             errorData?.detail ??
@@ -94,11 +133,24 @@ function SessionSetupPage({
           )
         }
 
-        const data: VideoInfo =
-          await response.json()
+        const data =
+          (await response.json()) as VideoInfo
+
+        if (!data.video_id) {
+          throw new Error(
+            'The backend did not return a video ID.',
+          )
+        }
 
         setVideoInfo(data)
       } catch (error) {
+        if (
+          error instanceof DOMException &&
+          error.name === 'AbortError'
+        ) {
+          return
+        }
+
         const message =
           error instanceof Error
             ? error.message
@@ -106,14 +158,23 @@ function SessionSetupPage({
 
         setVideoError(message)
       } finally {
-        setIsLoading(false)
+        if (
+          !controller.signal.aborted
+        ) {
+          setIsLoading(false)
+        }
       }
     }
 
     void loadCurrentVideo()
+
+    return () => {
+      controller.abort()
+    }
   }, [])
 
-  function getFrequencyLabel() {
+  function getFrequencyLabel():
+    FrequencyLabel {
     if (frequency < 34) {
       return 'Occasional'
     }
@@ -127,18 +188,52 @@ function SessionSetupPage({
 
   function getFrequencyHint() {
     if (frequency < 34) {
-      return 'Orby will ask you a question every 7-10 minutes'
+      return 'Orby will ask you a question every 7–10 minutes'
     }
 
     if (frequency < 67) {
-      return 'Orby will ask you a question every 4-6 minutes'
+      return 'Orby will ask you a question every 4–6 minutes'
     }
 
-    return 'Orby will ask you a question every 2-3 minutes'
+    return 'Orby will ask you a question every 2–3 minutes'
   }
 
   function handleClose() {
     window.close()
+  }
+
+  async function handleStartLearning() {
+    if (
+      !videoInfo ||
+      isLoading ||
+      isStarting
+    ) {
+      return
+    }
+
+    try {
+      setIsStarting(true)
+      setVideoError('')
+
+      await onStart(
+        focus,
+        videoInfo.video_id,
+        getFrequencyLabel(),
+      )
+    } catch (error) {
+      console.error(
+        'Could not start learning:',
+        error,
+      )
+
+      setVideoError(
+        error instanceof Error
+          ? error.message
+          : 'Could not start the learning session.',
+      )
+    } finally {
+      setIsStarting(false)
+    }
   }
 
   return (
@@ -146,56 +241,93 @@ function SessionSetupPage({
       <div className="stars">
         <span
           className="star"
-          style={{ top: '8%', left: '10%' }}
+          style={{
+            top: '8%',
+            left: '10%',
+          }}
         />
+
         <span
           className="star"
-          style={{ top: '15%', left: '85%' }}
+          style={{
+            top: '15%',
+            left: '85%',
+          }}
         />
+
         <span
           className="star"
-          style={{ top: '25%', left: '60%' }}
+          style={{
+            top: '25%',
+            left: '60%',
+          }}
         />
+
         <span
           className="star"
-          style={{ top: '35%', left: '5%' }}
+          style={{
+            top: '35%',
+            left: '5%',
+          }}
         />
+
         <span
           className="star"
-          style={{ top: '45%', left: '92%' }}
+          style={{
+            top: '45%',
+            left: '92%',
+          }}
         />
+
         <span
           className="star"
-          style={{ top: '58%', left: '15%' }}
+          style={{
+            top: '58%',
+            left: '15%',
+          }}
         />
+
         <span
           className="star"
-          style={{ top: '68%', left: '80%' }}
+          style={{
+            top: '68%',
+            left: '80%',
+          }}
         />
+
         <span
           className="star"
-          style={{ top: '78%', left: '50%' }}
+          style={{
+            top: '78%',
+            left: '50%',
+          }}
         />
+
         <span
           className="star"
-          style={{ top: '88%', left: '25%' }}
+          style={{
+            top: '88%',
+            left: '25%',
+          }}
         />
       </div>
 
       <div className="header">
         <div className="brand">
           <div className="logo-dot" />
+
           <span className="brand-name">
             OrbitAI
           </span>
         </div>
 
         <button
+          type="button"
           className="close-btn"
           aria-label="Close"
           onClick={handleClose}
         >
-          âœ•
+          ✕
         </button>
       </div>
 
@@ -210,35 +342,41 @@ function SessionSetupPage({
           </div>
         )}
 
-        {!isLoading && videoError && (
-          <div className="video-error">
-            {videoError}
-          </div>
-        )}
-
-        {!isLoading && videoInfo && (
-          <>
-            <img
-              className="video-thumb"
-              src={videoInfo.thumbnail_url}
-              alt={videoInfo.title}
-            />
-
-            <div className="video-info">
-              <div className="video-title">
-                {videoInfo.title}
-              </div>
-
-              <div className="video-meta">
-                {videoInfo.channel_name}
-              </div>
-
-              <div className="video-meta">
-                {videoInfo.duration}
-              </div>
+        {!isLoading &&
+          videoError && (
+            <div className="video-error">
+              {videoError}
             </div>
-          </>
-        )}
+          )}
+
+        {!isLoading &&
+          videoInfo && (
+            <>
+              <img
+                className="video-thumb"
+                src={
+                  videoInfo.thumbnail_url
+                }
+                alt={videoInfo.title}
+              />
+
+              <div className="video-info">
+                <div className="video-title">
+                  {videoInfo.title}
+                </div>
+
+                <div className="video-meta">
+                  {
+                    videoInfo.channel_name
+                  }
+                </div>
+
+                <div className="video-meta">
+                  {videoInfo.duration}
+                </div>
+              </div>
+            </>
+          )}
       </div>
 
       <div className="section-label">
@@ -254,11 +392,16 @@ function SessionSetupPage({
           ] as const
         ).map((level) => (
           <button
+            type="button"
             key={level}
             className={`focus-btn ${
-              focus === level ? 'active' : ''
+              focus === level
+                ? 'active'
+                : ''
             }`}
-            onClick={() => setFocus(level)}
+            onClick={() =>
+              setFocus(level)
+            }
           >
             {level}
           </button>
@@ -282,10 +425,13 @@ function SessionSetupPage({
         value={frequency}
         onChange={(event) =>
           setFrequency(
-            Number(event.target.value),
+            Number(
+              event.target.value,
+            ),
           )
         }
         className="freq-slider"
+        aria-label="Question frequency"
       />
 
       <div className="freq-hint">
@@ -293,12 +439,21 @@ function SessionSetupPage({
       </div>
 
       <button
-  className="start-btn"
-  onClick={() => onStart(focus, videoInfo!.video_id)}
-  disabled={isLoading || !videoInfo}
->
-  Start Learning
-</button>
+        type="button"
+        className="start-btn"
+        onClick={() =>
+          void handleStartLearning()
+        }
+        disabled={
+          isLoading ||
+          isStarting ||
+          !videoInfo
+        }
+      >
+        {isStarting
+          ? 'Starting...'
+          : 'Start Learning'}
+      </button>
     </div>
   )
 }
